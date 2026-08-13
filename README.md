@@ -37,6 +37,22 @@ Migrating an existing mod to the community fork requires two changes:
 
 The API type names themselves are unchanged, so existing usages such as `Subworld`, `SubworldSystem`, and `SubserverLink` do not need to be renamed. Remove the original `SubworldLibrary` dependency and do not enable both libraries together.
 
+## Returning players to their previous position
+
+Subworlds can opt into session-scoped return positions by overriding `ReturnToPreviousPosition`:
+
+```csharp
+public override bool ReturnToPreviousPosition => true;
+```
+
+When enabled, the library remembers the local player's position immediately before leaving and restores it after the normal spawn sequence when that subworld is re-entered. In multiplayer, restoration only occurs when the existing subserver is still running; restarting a closed subserver invalidates the saved position. In single-player, the subworld must be saved and still exist in the current world session.
+
+If another system closes or deletes a subworld instance explicitly, it can discard the local return position at the same time:
+
+```csharp
+SubworldSystem.ClearReturnPosition<MySubworld>();
+```
+
 ## Source layout
 
 - `SubworldLibrary.cs` contains the mod entry point, Mod.Call API, and packet dispatch.

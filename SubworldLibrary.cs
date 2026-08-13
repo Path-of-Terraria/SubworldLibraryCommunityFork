@@ -169,9 +169,13 @@ namespace SubworldLibraryCommunityFork
 			else
 			{
 				ushort id = reader.ReadUInt16();
+				bool destinationIsRunning = id < ushort.MaxValue && reader.ReadBoolean();
+
+				SubworldSystem.CaptureReturnPosition();
 
 				// might be better to set this at the end of the update cycle?
 				SubworldSystem.current = id < ushort.MaxValue ? SubworldSystem.subworlds[id] : null;
+				SubworldSystem.PrepareReturnPosition(SubworldSystem.current, destinationIsRunning);
 
 				Main.menuMode = 10;
 				Main.gameMenu = true;

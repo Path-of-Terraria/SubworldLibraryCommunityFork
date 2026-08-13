@@ -105,6 +105,7 @@ namespace SubworldLibraryCommunityFork
 			WorldFile.OnWorldLoad -= ReadCachedData;
 			Player.Hooks.OnEnterWorld -= OnEnterWorld;
 			Netplay.OnDisconnect -= OnDisconnect;
+			ClearReturnPositions();
 		}
 
 		private static void ReadCachedData()
@@ -125,6 +126,7 @@ namespace SubworldLibraryCommunityFork
 				current?.OnLoad();
 			}
 			cache = current;
+			TryRestoreReturnPosition(player);
 		}
 
 		private static void OnDisconnect()
@@ -135,6 +137,7 @@ namespace SubworldLibraryCommunityFork
 			}
 			current = null;
 			cache = null;
+			ClearReturnPositions();
 		}
 
 		public override void SaveWorldData(TagCompound tag)
@@ -259,8 +262,11 @@ namespace SubworldLibraryCommunityFork
 				return;
 			}
 
+			CaptureReturnPosition();
+
 			if (index == int.MinValue)
 			{
+				ClearReturnPositions();
 				current = null;
 				Main.menuMode = 10;
 				Main.gameMenu = true;
@@ -277,6 +283,7 @@ namespace SubworldLibraryCommunityFork
 				}
 
 				current = index < 0 ? null : subworlds[index];
+				PrepareReturnPosition(current, IsSinglePlayerDestinationAvailable(current));
 				Main.menuMode = 10;
 				Main.gameMenu = true;
 

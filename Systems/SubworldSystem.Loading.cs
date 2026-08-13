@@ -291,6 +291,7 @@ namespace SubworldLibraryCommunityFork
 					CacheWorldData();
 				}
 				cache = null;
+				ClearReturnPositions();
 				Main.menuMode = 0;
 				return;
 			}
@@ -404,6 +405,7 @@ namespace SubworldLibraryCommunityFork
 		private static void SpawnPlayer()
 		{
 			Main.LocalPlayer.Spawn(PlayerSpawnContext.SpawningIntoWorld);
+			TryRestoreReturnPosition(Main.LocalPlayer);
 			WorldFile.SetOngoingToTemps();
 			Main.resetClouds = true;
 			Main.gameMenu = false;

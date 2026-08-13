@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Threading;
 using Terraria;
 using Terraria.Chat;
+using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -20,6 +21,7 @@ namespace SubworldLibraryCommunityFork
 			}
 
 			pendingMoves[player] = id;
+			bool destinationIsRunning = id < ushort.MaxValue && subworlds[id].link != null;
 
 			// a new move supersedes any handshake we were still waiting on
 			rejoining[player] = false;
@@ -27,6 +29,10 @@ namespace SubworldLibraryCommunityFork
 
 			ModPacket packet = ModContent.GetInstance<SubworldLibrary>().GetPacket();
 			packet.Write(id);
+			if (id < ushort.MaxValue)
+			{
+				packet.Write(destinationIsRunning);
+			}
 			packet.Send(player);
 
 			if (playerLocations[player] >= 0)
@@ -39,7 +45,7 @@ namespace SubworldLibraryCommunityFork
 				// this respects the vanilla call order
 
 				Main.player[player].active = false;
-				NetMessage.SendData(14, -1, player, null, player, 0);
+				NetMessage.SendData(MessageID.PlayerActive, -1, player, null, player, 0);
 				ChatHelper.BroadcastChatMessage(NetworkText.FromKey("Mods.SubworldLibraryCommunityFork.Move", Netplay.Clients[player].Name, subworlds[id].DisplayName), new Color(255, 240, 20), player);
 				Player.Hooks.PlayerDisconnect(player);
 			}
