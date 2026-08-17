@@ -97,13 +97,29 @@ namespace SubworldLibraryCommunityFork
 		/// </summary>
 		public virtual bool NoPlayerSaving => false;
 		/// <summary>
-		/// Remembers each local player's position when they leave this subworld and restores it when they re-enter the same active instance.
-		/// <br/>In multiplayer, opted-in subservers remain running while empty until explicitly stopped or the main server closes.
-		/// <br/>In multiplayer, the saved position is discarded if the destination subserver has stopped and must be restarted.
-		/// <br/>In single-player, the saved position remains available for the current world session.
+		/// Compatibility opt-in for per-player return positions. New implementations can override
+		/// <see cref="ReturnPositionMode"/> to select per-player or shared behavior explicitly.
 		/// <br/>Default: false
 		/// </summary>
 		public virtual bool ReturnToPreviousPosition => false;
+		/// <summary>
+		/// Controls whether players return to their own saved positions or to one shared position.
+		/// <br/>Saved subworlds persist their instance identity in the main world, including across game
+		/// restarts and empty multiplayer subserver restarts. Per-player return markers are saved with the player.
+		/// <br/>Call <see cref="SubworldSystem.InvalidateReturnInstance(string)"/> before deleting or replacing a saved instance.
+		/// <br/>Defaults to <see cref="SubworldReturnPositionMode.PerPlayer"/> when <see cref="ReturnToPreviousPosition"/> is true; otherwise disabled.
+		/// </summary>
+		public virtual SubworldReturnPositionMode ReturnPositionMode => ReturnToPreviousPosition
+			? SubworldReturnPositionMode.PerPlayer
+			: SubworldReturnPositionMode.Disabled;
+		/// <summary>
+		/// Selects the position saved when a player leaves. Shared mode publishes this position
+		/// to the other players returning to the same instance.
+		/// </summary>
+		public virtual Vector2 GetReturnPosition(Player player)
+		{
+			return player.position;
+		}
 		/// <summary>
 		/// Completely disables vanilla world updating in the subworld.
 		/// <br/>Do not enable unless you are replicating a standard world!

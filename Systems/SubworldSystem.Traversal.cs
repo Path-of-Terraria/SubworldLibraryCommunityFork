@@ -21,7 +21,14 @@ namespace SubworldLibraryCommunityFork
 			}
 
 			pendingMoves[player] = id;
-			bool destinationIsRunning = id < ushort.MaxValue && subworlds[id].link != null;
+			Guid destinationInstanceId = Guid.Empty;
+			Vector2? sharedReturnPosition = null;
+			if (id < ushort.MaxValue)
+			{
+				Subworld destination = subworlds[id];
+				destinationInstanceId = GetMultiplayerReturnInstanceId(destination, destination.link != null);
+				sharedReturnPosition = GetSharedReturnPosition(destination, destinationInstanceId);
+			}
 
 			// a new move supersedes any handshake we were still waiting on
 			rejoining[player] = false;
@@ -31,7 +38,13 @@ namespace SubworldLibraryCommunityFork
 			packet.Write(id);
 			if (id < ushort.MaxValue)
 			{
-				packet.Write(destinationIsRunning);
+				packet.Write(destinationInstanceId.ToByteArray());
+				packet.Write(sharedReturnPosition.HasValue);
+				if (sharedReturnPosition.HasValue)
+				{
+					packet.Write(sharedReturnPosition.Value.X);
+					packet.Write(sharedReturnPosition.Value.Y);
+				}
 			}
 			packet.Send(player);
 

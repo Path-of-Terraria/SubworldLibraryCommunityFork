@@ -12,6 +12,7 @@
         <Compile Include="CrossModSubworld.cs" />
         <Compile Include="SubserverLink.cs" />
         <Compile Include="Subworld.cs" />
+        <Compile Include="SubworldReturnPositionMode.cs" />
         <Compile Include="SubworldLibrary.cs" />
         <Compile Include="SubworldSystem.cs" />
         <Compile Include="Hooks/**/*.cs" />

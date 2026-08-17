@@ -287,11 +287,7 @@ namespace SubworldLibraryCommunityFork
 			if (Netplay.HasClients)
 			{
 				Netplay.HasClients = false;
-				
-				if (SubworldSystem.current?.ReturnToPreviousPosition != true)
-				{
-					Netplay.Disconnect = true;
-				}
+				Netplay.Disconnect = true;
 			}
 		}
 	}

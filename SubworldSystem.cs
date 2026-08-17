@@ -112,6 +112,7 @@ namespace SubworldLibraryCommunityFork
 			Player.Hooks.OnEnterWorld -= OnEnterWorld;
 			Netplay.OnDisconnect -= OnDisconnect;
 			ClearReturnPositions();
+			main = null;
 		}
 
 		private static void ReadCachedData()
@@ -137,24 +138,29 @@ namespace SubworldLibraryCommunityFork
 
 		private static void OnDisconnect()
 		{
+			CaptureReturnPosition();
 			if (current != null || cache != null)
 			{
 				Main.menuMode = 14;
 			}
 			current = null;
 			cache = null;
-			ClearReturnPositions();
+			ClearReturnPositions(clearPlayerPositions: false);
+			main = null;
 		}
 
 		/// <inheritdoc />
 		public override void SaveWorldData(TagCompound tag)
 		{
+			SaveReturnWorldState(tag);
 			// cached world data is saved in ExitWorldCallBack
 		}
 
 		/// <inheritdoc />
 		public override void LoadWorldData(TagCompound tag)
 		{
+			LoadReturnWorldState(tag);
+
 			if (!tag.TryGet("mod", out string mod) || !tag.TryGet("name", out string name) || !tag.TryGet("data", out TagCompound data))
 			{
 				return;
@@ -286,7 +292,6 @@ namespace SubworldLibraryCommunityFork
 
 			if (index == int.MinValue)
 			{
-				ClearReturnPositions();
 				current = null;
 				Main.menuMode = 10;
 				Main.gameMenu = true;
@@ -303,7 +308,8 @@ namespace SubworldLibraryCommunityFork
 				}
 
 				current = index < 0 ? null : subworlds[index];
-				PrepareReturnPosition(current, IsSinglePlayerDestinationAvailable(current));
+				Guid destinationInstanceId = GetSinglePlayerReturnInstanceId(current);
+				PrepareReturnPosition(current, destinationInstanceId, GetSharedReturnPosition(current, destinationInstanceId));
 				Main.menuMode = 10;
 				Main.gameMenu = true;
 
@@ -313,6 +319,7 @@ namespace SubworldLibraryCommunityFork
 
 			ModPacket packet = ModContent.GetInstance<SubworldLibrary>().GetPacket();
 			packet.Write(index < 0 ? ushort.MaxValue : (ushort)index);
+			WriteSharedReturnPositionRequest(packet);
 			packet.Send();
 		}
 

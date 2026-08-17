@@ -166,19 +166,25 @@ namespace SubworldLibraryCommunityFork
 					// duplicate or late ack arriving after FinishMove starts a whole new move for a
 					// client that is still replaying the join handshake, deactivating it again partway
 					// through and leaving it desynced for everyone.
+					SubworldSystem.ReadSharedReturnPositionRequest(whoAmI, reader);
 					SubworldSystem.MovePlayerToSubserver(whoAmI, id);
 				}
 			}
 			else
 			{
 				ushort id = reader.ReadUInt16();
-				bool destinationIsRunning = id < ushort.MaxValue && reader.ReadBoolean();
+				Guid destinationInstanceId = id < ushort.MaxValue ? new Guid(reader.ReadBytes(16)) : Guid.Empty;
+				Vector2? sharedReturnPosition = null;
+				if (id < ushort.MaxValue && reader.ReadBoolean())
+				{
+					sharedReturnPosition = new Vector2(reader.ReadSingle(), reader.ReadSingle());
+				}
 
 				SubworldSystem.CaptureReturnPosition();
 
 				// might be better to set this at the end of the update cycle?
 				SubworldSystem.current = id < ushort.MaxValue ? SubworldSystem.subworlds[id] : null;
-				SubworldSystem.PrepareReturnPosition(SubworldSystem.current, destinationIsRunning);
+				SubworldSystem.PrepareReturnPosition(SubworldSystem.current, destinationInstanceId, sharedReturnPosition);
 
 				Main.menuMode = 10;
 				Main.gameMenu = true;

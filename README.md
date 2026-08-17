@@ -39,19 +39,31 @@ The API type names themselves are unchanged, so existing usages such as `Subworl
 
 ## Returning players to their previous position
 
-Subworlds can opt into session-scoped return positions by overriding `ReturnToPreviousPosition`:
+Subworlds can opt into persistent return positions and choose whether the saved location is per player or shared:
 
 ```csharp
-public override bool ReturnToPreviousPosition => true;
+public override SubworldReturnPositionMode ReturnPositionMode => SubworldReturnPositionMode.PerPlayer;
 ```
-
-When enabled, the library remembers the local player's position immediately before leaving and restores it after the normal spawn sequence when that subworld is re-entered. In multiplayer, opted-in subservers remain running while empty so the same live instance can be revisited; explicitly stopping the subserver, closing the main server, or a subserver failure invalidates the saved position. In single-player, the subworld must be saved and still exist in the current world session.
-
-If another system closes or deletes a subworld instance explicitly, it can discard the local return position at the same time:
 
 ```csharp
-SubworldSystem.ClearReturnPosition<MySubworld>();
+public override SubworldReturnPositionMode ReturnPositionMode => SubworldReturnPositionMode.Shared;
 ```
+
+`PerPlayer` returns each player to the position they saved when leaving. `Shared` publishes the most recently saved position to the server and returns every player who previously left that instance to that shared location. A player entering the instance for the first time still uses its normal spawn. Existing overrides of `ReturnToPreviousPosition => true` remain supported and select `PerPlayer` mode.
+
+By default, the player's current position is saved. Consumers can override `GetReturnPosition(Player)` when a portal, checkpoint, or other system should supply the location instead.
+
+Each saved instance receives a persistent ID. The ID and any shared position are stored with the main world, while a player's own return marker and position are stored with that player. Return positions therefore survive returning to the main menu, restarting the game, and restarting an empty multiplayer subserver. A position is restored only when the player and main world agree on the same subworld instance ID.
+
+Unsaved subworlds receive a new ID after an empty restart, preventing stale coordinates from being restored into regenerated terrain. The instance check also prevents a position saved for one main world or multiplayer server from being used in another.
+
+If another system closes, deletes, or replaces a saved subworld instance explicitly, invalidate its instance ID before doing so:
+
+```csharp
+SubworldSystem.InvalidateReturnInstance<MySubworld>();
+```
+
+The invalidation must run on the authoritative main server in multiplayer. Clients compare the new ID on their next entry and discard any position belonging to the replaced instance.
 
 ## Source layout
 

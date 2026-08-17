@@ -206,12 +206,6 @@ namespace SubworldLibraryCommunityFork
 				}
 				else if (timer.ElapsedMilliseconds > 30000)
 				{
-					if (current?.ReturnToPreviousPosition == true)
-					{
-						timer.Restart();
-						continue;
-					}
-
 					ModContent.GetInstance<SubworldLibrary>().Logger.Info("No packets received in 30 seconds, closing");
 					Netplay.Disconnect = true;
 					Main.instance.Exit();
@@ -222,6 +216,11 @@ namespace SubworldLibraryCommunityFork
 
 		internal static void ExitWorldCallBack(object index)
 		{
+			if (index == null)
+			{
+				CaptureReturnPosition();
+			}
+
 			// presumably avoids a race condition?
 			int netMode = Main.netMode;
 
@@ -298,7 +297,8 @@ namespace SubworldLibraryCommunityFork
 					CacheWorldData();
 				}
 				cache = null;
-				ClearReturnPositions();
+				ClearReturnPositions(clearPlayerPositions: false);
+				main = null;
 				Main.menuMode = 0;
 				return;
 			}
