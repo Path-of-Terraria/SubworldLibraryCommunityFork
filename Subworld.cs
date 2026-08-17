@@ -98,6 +98,7 @@ namespace SubworldLibraryCommunityFork
 		public virtual bool NoPlayerSaving => false;
 		/// <summary>
 		/// Remembers each local player's position when they leave this subworld and restores it when they re-enter the same active instance.
+		/// <br/>In multiplayer, opted-in subservers remain running while empty until explicitly stopped or the main server closes.
 		/// <br/>In multiplayer, the saved position is discarded if the destination subserver has stopped and must be restarted.
 		/// <br/>In single-player, the saved position remains available for the current world session.
 		/// <br/>Default: false

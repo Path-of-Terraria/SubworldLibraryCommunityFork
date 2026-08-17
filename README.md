@@ -45,7 +45,7 @@ Subworlds can opt into session-scoped return positions by overriding `ReturnToPr
 public override bool ReturnToPreviousPosition => true;
 ```
 
-When enabled, the library remembers the local player's position immediately before leaving and restores it after the normal spawn sequence when that subworld is re-entered. In multiplayer, restoration only occurs when the existing subserver is still running; restarting a closed subserver invalidates the saved position. In single-player, the subworld must be saved and still exist in the current world session.
+When enabled, the library remembers the local player's position immediately before leaving and restores it after the normal spawn sequence when that subworld is re-entered. In multiplayer, opted-in subservers remain running while empty so the same live instance can be revisited; explicitly stopping the subserver, closing the main server, or a subserver failure invalidates the saved position. In single-player, the subworld must be saved and still exist in the current world session.
 
 If another system closes or deletes a subworld instance explicitly, it can discard the local return position at the same time:
 
