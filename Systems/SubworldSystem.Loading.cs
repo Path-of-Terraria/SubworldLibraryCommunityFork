@@ -8,6 +8,7 @@ using System.Threading;
 using Terraria;
 using Terraria.Audio;
 using Terraria.Graphics.Capture;
+using Terraria.ID;
 using Terraria.IO;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -276,7 +277,7 @@ namespace SubworldLibraryCommunityFork
 			else if (index == null)
 			{
 				Netplay.Disconnect = true;
-				Main.netMode = 0;
+				Main.netMode = NetmodeID.SinglePlayer;
 			}
 			SystemLoader.OnWorldUnload();
 
@@ -371,7 +372,7 @@ namespace SubworldLibraryCommunityFork
 			{
 				ModContent.GetInstance<SubworldLibrary>().Logger.Error("Failed to load \"" + main.Name + (WorldGen.worldBackup ? "\" from file" : "\" from file, no backup"));
 				Main.menuMode = 0;
-				if (Main.netMode == 2)
+				if (Main.netMode == NetmodeID.Server)
 				{
 					Netplay.Disconnect = true;
 				}
@@ -380,7 +381,7 @@ namespace SubworldLibraryCommunityFork
 
 			WorldGen.gen = false;
 
-			if (Main.netMode != 2)
+			if (Main.netMode != NetmodeID.Server)
 			{
 				if (Main.mapEnabled)
 				{
@@ -414,7 +415,7 @@ namespace SubworldLibraryCommunityFork
 		private static void LoadSubworld(string path, bool cloud)
 		{
 			Main.worldName = current.DisplayName.Value;
-			if (Main.netMode == 2)
+			if (Main.netMode == NetmodeID.Server)
 			{
 				Console.Title = Main.worldName;
 			}
@@ -550,7 +551,7 @@ namespace SubworldLibraryCommunityFork
 				{
 					status = current != null ? current.ReadFile(reader) : WorldFile.LoadWorld_Version2(reader);
 				}
-				if (Main.netMode == 2)
+				if (Main.netMode == NetmodeID.Server)
 				{
 					Console.Title = Main.worldName;
 				}

@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Threading.Tasks;
 using Terraria;
+using Terraria.ID;
 using Terraria.IO;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -52,6 +53,9 @@ namespace SubworldLibraryCommunityFork
 		void ISocket.StopListening() { }
 	}
 
+	/// <summary>
+	/// Coordinates subworld registration, transitions, persistence, and multiplayer routing.
+	/// </summary>
 	public partial class SubworldSystem : ModSystem
 	{
 		internal static List<Subworld> subworlds;
@@ -78,6 +82,7 @@ namespace SubworldLibraryCommunityFork
 		internal static byte[] queue;
 		internal static int totalData;
 
+		/// <inheritdoc />
 		public override void OnModLoad()
 		{
 			subworlds = new List<Subworld>();
@@ -100,6 +105,7 @@ namespace SubworldLibraryCommunityFork
 			suppressAutoShutdown = -1;
 		}
 
+		/// <inheritdoc />
 		public override void Unload()
 		{
 			WorldFile.OnWorldLoad -= ReadCachedData;
@@ -120,7 +126,7 @@ namespace SubworldLibraryCommunityFork
 
 		private static void OnEnterWorld(Player player)
 		{
-			if (Main.netMode == 1)
+			if (Main.netMode == NetmodeID.MultiplayerClient)
 			{
 				cache?.OnUnload();
 				current?.OnLoad();
@@ -140,11 +146,13 @@ namespace SubworldLibraryCommunityFork
 			ClearReturnPositions();
 		}
 
+		/// <inheritdoc />
 		public override void SaveWorldData(TagCompound tag)
 		{
 			// cached world data is saved in ExitWorldCallBack
 		}
 
+		/// <inheritdoc />
 		public override void LoadWorldData(TagCompound tag)
 		{
 			if (!tag.TryGet("mod", out string mod) || !tag.TryGet("name", out string name) || !tag.TryGet("data", out TagCompound data))
@@ -160,16 +168,28 @@ namespace SubworldLibraryCommunityFork
 			copiedData = data;
 		}
 
+		private static bool _noReturn;
+
 		/// <summary>
 		/// Hides the Return button.
 		/// <br/>Its value is reset before <see cref="Subworld.OnEnter"/> is called, and after <see cref="Subworld.OnExit"/> is called.
 		/// </summary>
-		public static bool noReturn;
+		public static bool noReturn
+		{
+			get => _noReturn;
+			set => _noReturn = value;
+		}
+		private static bool _hideUnderworld;
+
 		/// <summary>
 		/// Hides the Underworld background.
 		/// <br/>Its value is reset before <see cref="Subworld.OnEnter"/> is called, and after <see cref="Subworld.OnExit"/> is called.
 		/// </summary>
-		public static bool hideUnderworld;
+		public static bool hideUnderworld
+		{
+			get => _hideUnderworld;
+			set => _hideUnderworld = value;
+		}
 
 		/// <summary>
 		/// The current subworld.
@@ -257,7 +277,7 @@ namespace SubworldLibraryCommunityFork
 
 		private static void BeginEntering(int index)
 		{
-			if (Main.netMode == 2)
+			if (Main.netMode == NetmodeID.Server)
 			{
 				return;
 			}
@@ -275,7 +295,7 @@ namespace SubworldLibraryCommunityFork
 				return;
 			}
 
-			if (Main.netMode == 0)
+			if (Main.netMode == NetmodeID.SinglePlayer)
 			{
 				if (current == null && index >= 0)
 				{
@@ -301,7 +321,7 @@ namespace SubworldLibraryCommunityFork
 		/// </summary>
 		public static void MovePlayerToSubworld(string id, int player)
 		{
-			if (Main.netMode == 1 || (Main.netMode == 2 && current != null))
+			if (Main.netMode == NetmodeID.MultiplayerClient || (Main.netMode == NetmodeID.Server && current != null))
 			{
 				return;
 			}
@@ -310,7 +330,7 @@ namespace SubworldLibraryCommunityFork
 			{
 				if (subworlds[i].FullName == id)
 				{
-					if (Main.netMode == 0)
+					if (Main.netMode == NetmodeID.SinglePlayer)
 					{
 						BeginEntering(i);
 						return;
@@ -327,7 +347,7 @@ namespace SubworldLibraryCommunityFork
 		/// </summary>
 		public static void MovePlayerToSubworld<T>(int player) where T : Subworld
 		{
-			if (Main.netMode == 1 || (Main.netMode == 2 && current != null))
+			if (Main.netMode == NetmodeID.MultiplayerClient || (Main.netMode == NetmodeID.Server && current != null))
 			{
 				return;
 			}
@@ -336,7 +356,7 @@ namespace SubworldLibraryCommunityFork
 			{
 				if (subworlds[i].GetType() == typeof(T))
 				{
-					if (Main.netMode == 0)
+					if (Main.netMode == NetmodeID.SinglePlayer)
 					{
 						BeginEntering(i);
 						return;
@@ -353,12 +373,12 @@ namespace SubworldLibraryCommunityFork
 		/// </summary>
 		public static void MovePlayerToMainWorld(int player)
 		{
-			if (Main.netMode == 1 || (Main.netMode == 2 && current != null))
+			if (Main.netMode == NetmodeID.MultiplayerClient || (Main.netMode == NetmodeID.Server && current != null))
 			{
 				return;
 			}
 
-			if (Main.netMode == 0)
+			if (Main.netMode == NetmodeID.SinglePlayer)
 			{
 				BeginEntering(-1);
 				return;

@@ -10,13 +10,17 @@ using static Mono.Cecil.Cil.OpCodes;
 
 namespace SubworldLibraryCommunityFork
 {
+	/// <summary>
+	/// Provides the community fork's tModLoader entry point and runtime integration hooks.
+	/// </summary>
 	public partial class SubworldLibrary
 	{
 		private void RegisterClientHooks()
 		{
 			FieldInfo current = typeof(SubworldSystem).GetField("current", BindingFlags.NonPublic | BindingFlags.Static);
 			FieldInfo cache = typeof(SubworldSystem).GetField("cache", BindingFlags.NonPublic | BindingFlags.Static);
-			FieldInfo hideUnderworld = typeof(SubworldSystem).GetField("hideUnderworld");
+			MethodInfo hideUnderworld = typeof(SubworldSystem).GetProperty(nameof(SubworldSystem.hideUnderworld))?.GetMethod;
+			MethodInfo noReturn = typeof(SubworldSystem).GetProperty(nameof(SubworldSystem.noReturn))?.GetMethod;
 
 			IL_Main.DoDraw += il =>
 			{
@@ -63,7 +67,7 @@ namespace SubworldLibraryCommunityFork
 					return;
 				}
 
-				c.Emit(Ldsfld, hideUnderworld);
+				c.Emit(OpCodes.Call, hideUnderworld);
 				var skip = c.DefineLabel();
 				c.Emit(Brfalse, skip);
 
@@ -86,7 +90,7 @@ namespace SubworldLibraryCommunityFork
 					return;
 				}
 
-				c.Emit(Ldsfld, hideUnderworld);
+				c.Emit(OpCodes.Call, hideUnderworld);
 				var skip = c.DefineLabel();
 				c.Emit(Brfalse, skip);
 
@@ -151,7 +155,7 @@ namespace SubworldLibraryCommunityFork
 				ccc.Index += 6;
 				ccc.MarkLabel(label);
 
-				cccc.Emit(Ldsfld, typeof(SubworldSystem).GetField("noReturn"));
+				cccc.Emit(OpCodes.Call, noReturn);
 				cccc.Emit(Brtrue, label);
 
 				c.Emit(Ldsfld, current);
@@ -196,7 +200,7 @@ namespace SubworldLibraryCommunityFork
 
 				c.MarkLabel(skip);
 
-				cc.Emit(Ldsfld, hideUnderworld);
+				cc.Emit(OpCodes.Call, hideUnderworld);
 				skip = cc.DefineLabel();
 				cc.Emit(Brtrue, skip);
 
@@ -213,7 +217,7 @@ namespace SubworldLibraryCommunityFork
 					return;
 				}
 
-				c.Emit(Ldsfld, hideUnderworld);
+				c.Emit(OpCodes.Call, hideUnderworld);
 				var skip = c.DefineLabel();
 				c.Emit(Brfalse, skip);
 
@@ -230,7 +234,7 @@ namespace SubworldLibraryCommunityFork
 			{
 				var c = new ILCursor(il);
 
-				c.Emit(Ldsfld, hideUnderworld);
+				c.Emit(OpCodes.Call, hideUnderworld);
 				var skip = c.DefineLabel();
 				c.Emit(Brtrue, skip);
 				c.Index = c.Instrs.Count - 1;
