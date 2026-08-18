@@ -97,21 +97,13 @@ namespace SubworldLibraryCommunityFork
 		/// </summary>
 		public virtual bool NoPlayerSaving => false;
 		/// <summary>
-		/// Compatibility opt-in for per-player return positions. New implementations can override
-		/// <see cref="ReturnPositionMode"/> to select per-player or shared behavior explicitly.
-		/// <br/>Default: false
-		/// </summary>
-		public virtual bool ReturnToPreviousPosition => false;
-		/// <summary>
 		/// Controls whether players return to their own saved positions or to one shared position.
 		/// <br/>Saved subworlds persist their instance identity in the main world, including across game
 		/// restarts and empty multiplayer subserver restarts. Per-player return markers are saved with the player.
 		/// <br/>Call <see cref="SubworldSystem.InvalidateReturnInstance(string)"/> before deleting or replacing a saved instance.
-		/// <br/>Defaults to <see cref="SubworldReturnPositionMode.PerPlayer"/> when <see cref="ReturnToPreviousPosition"/> is true; otherwise disabled.
+		/// <br/>Default: <see cref="SubworldReturnPositionMode.Disabled"/>
 		/// </summary>
-		public virtual SubworldReturnPositionMode ReturnPositionMode => ReturnToPreviousPosition
-			? SubworldReturnPositionMode.PerPlayer
-			: SubworldReturnPositionMode.Disabled;
+		public virtual SubworldReturnPositionMode ReturnPositionMode => SubworldReturnPositionMode.Disabled;
 		/// <summary>
 		/// Selects the position saved when a player leaves. Shared mode publishes this position
 		/// to the other players returning to the same instance.

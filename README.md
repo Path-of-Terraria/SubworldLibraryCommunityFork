@@ -49,7 +49,7 @@ public override SubworldReturnPositionMode ReturnPositionMode => SubworldReturnP
 public override SubworldReturnPositionMode ReturnPositionMode => SubworldReturnPositionMode.Shared;
 ```
 
-`PerPlayer` returns each player to the position they saved when leaving. `Shared` publishes the most recently saved position to the server and returns every player who previously left that instance to that shared location. A player entering the instance for the first time still uses its normal spawn. Existing overrides of `ReturnToPreviousPosition => true` remain supported and select `PerPlayer` mode.
+`PerPlayer` returns each player to the position they saved when leaving. `Shared` publishes the most recently saved position to the server and returns every player who previously left that instance to that shared location. A player entering the instance for the first time still uses its normal spawn. The default mode is `Disabled`.
 
 By default, the player's current position is saved. Consumers can override `GetReturnPosition(Player)` when a portal, checkpoint, or other system should supply the location instead.
 
