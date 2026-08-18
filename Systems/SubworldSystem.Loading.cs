@@ -224,6 +224,11 @@ namespace SubworldLibraryCommunityFork
 
 		internal static void ExitWorldCallBack(object index)
 		{
+			if (index == null)
+			{
+				CaptureReturnPosition();
+			}
+
 			// presumably avoids a race condition?
 			int netMode = Main.netMode;
 
@@ -300,6 +305,8 @@ namespace SubworldLibraryCommunityFork
 					CacheWorldData();
 				}
 				cache = null;
+				ClearReturnPositions(clearPlayerPositions: false);
+				main = null;
 				Main.menuMode = 0;
 				return;
 			}
@@ -413,6 +420,7 @@ namespace SubworldLibraryCommunityFork
 		private static void SpawnPlayer()
 		{
 			Main.LocalPlayer.Spawn(PlayerSpawnContext.SpawningIntoWorld);
+			TryRestoreReturnPosition(Main.LocalPlayer);
 			WorldFile.SetOngoingToTemps();
 			Main.resetClouds = true;
 			Main.gameMenu = false;

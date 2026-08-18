@@ -37,6 +37,34 @@ Migrating an existing mod to the community fork requires two changes:
 
 The API type names themselves are unchanged, so existing usages such as `Subworld`, `SubworldSystem`, and `SubserverLink` do not need to be renamed. Remove the original `SubworldLibrary` dependency and do not enable both libraries together.
 
+## Returning players to their previous position
+
+Subworlds can opt into persistent return positions and choose whether the saved location is per player or shared:
+
+```csharp
+public override SubworldReturnPositionMode ReturnPositionMode => SubworldReturnPositionMode.PerPlayer;
+```
+
+```csharp
+public override SubworldReturnPositionMode ReturnPositionMode => SubworldReturnPositionMode.Shared;
+```
+
+`PerPlayer` returns each player to the position they saved when leaving. `Shared` publishes the most recently saved position to the server and returns every player who previously left that instance to that shared location. A player entering the instance for the first time still uses its normal spawn. The default mode is `Disabled`.
+
+By default, the player's current position is saved. Consumers can override `GetReturnPosition(Player)` when a portal, checkpoint, or other system should supply the location instead.
+
+Each saved instance receives a persistent ID. The ID and any shared position are stored with the main world, while a player's own return marker and position are stored with that player. Return positions therefore survive returning to the main menu, restarting the game, and restarting an empty multiplayer subserver. A position is restored only when the player and main world agree on the same subworld instance ID.
+
+Unsaved subworlds receive a new ID after an empty restart, preventing stale coordinates from being restored into regenerated terrain. The instance check also prevents a position saved for one main world or multiplayer server from being used in another.
+
+If another system closes, deletes, or replaces a saved subworld instance explicitly, invalidate its instance ID before doing so:
+
+```csharp
+SubworldSystem.InvalidateReturnInstance<MySubworld>();
+```
+
+The invalidation must run on the authoritative main server in multiplayer. Clients compare the new ID on their next entry and discard any position belonging to the replaced instance.
+
 ## Source layout
 
 - `SubworldLibrary.cs` contains the mod entry point, Mod.Call API, and packet dispatch.

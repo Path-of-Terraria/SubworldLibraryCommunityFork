@@ -335,16 +335,19 @@ namespace SubworldLibraryCommunityFork
 
 			IList<TagCompound> list = tagCompound.GetList<TagCompound>("modData");
 
+			TagCompound systemData = new TagCompound
+			{
+				["mod"] = cache.Mod.Name,
+				["name"] = cache.Name,
+				["data"] = copiedData
+			};
+			WriteReturnWorldState(systemData);
+
 			TagCompound data = new TagCompound
 			{
 				["mod"] = system.Mod.Name,
 				["name"] = system.Name,
-				["data"] = new TagCompound
-				{
-					["mod"] = cache.Mod.Name,
-					["name"] = cache.Name,
-					["data"] = copiedData
-				}
+				["data"] = systemData
 			};
 
 			bool addTag = true;

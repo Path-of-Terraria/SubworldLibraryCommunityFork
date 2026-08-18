@@ -21,6 +21,14 @@ namespace SubworldLibraryCommunityFork
 			}
 
 			pendingMoves[player] = id;
+			Guid destinationInstanceId = Guid.Empty;
+			Vector2? sharedReturnPosition = null;
+			if (id < ushort.MaxValue)
+			{
+				Subworld destination = subworlds[id];
+				destinationInstanceId = GetMultiplayerReturnInstanceId(destination, destination.link != null);
+				sharedReturnPosition = GetSharedReturnPosition(destination, destinationInstanceId);
+			}
 
 			// a new move supersedes any handshake we were still waiting on
 			rejoining[player] = false;
@@ -28,6 +36,16 @@ namespace SubworldLibraryCommunityFork
 
 			ModPacket packet = ModContent.GetInstance<SubworldLibrary>().GetPacket();
 			packet.Write(id);
+			if (id < ushort.MaxValue)
+			{
+				packet.Write(destinationInstanceId.ToByteArray());
+				packet.Write(sharedReturnPosition.HasValue);
+				if (sharedReturnPosition.HasValue)
+				{
+					packet.Write(sharedReturnPosition.Value.X);
+					packet.Write(sharedReturnPosition.Value.Y);
+				}
+			}
 			packet.Send(player);
 
 			if (playerLocations[player] >= 0)
@@ -40,7 +58,7 @@ namespace SubworldLibraryCommunityFork
 				// this respects the vanilla call order
 
 				Main.player[player].active = false;
-			NetMessage.SendData(MessageID.PlayerActive, -1, player, null, player, 0);
+				NetMessage.SendData(MessageID.PlayerActive, -1, player, null, player, 0);
 				ChatHelper.BroadcastChatMessage(NetworkText.FromKey("Mods.SubworldLibraryCommunityFork.Move", Netplay.Clients[player].Name, subworlds[id].DisplayName), new Color(255, 240, 20), player);
 				Player.Hooks.PlayerDisconnect(player);
 			}
