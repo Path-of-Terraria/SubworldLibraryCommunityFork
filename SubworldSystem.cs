@@ -70,12 +70,10 @@ namespace SubworldLibraryCommunityFork
 		internal static int[] pendingMoves;
 		internal static HashSet<ISocket> deniedSockets;
 
-		// players who have been dropped back to State 1 by FinishMove and are replaying the vanilla
-		// join handshake against the main server. See UpdateRejoiningPlayers.
 		internal static bool[] rejoining;
-		// set while a player is rejoining if any other player was mid-transition at the same time,
-		// which is the window where join syncs get dropped in both directions.
-		internal static bool[] rejoinNeedsResync;
+		private static int[] rejoinLastState;
+		private static int[] rejoinStallTicks;
+		private static int[] rejoinPrompts;
 
 		internal static NamedPipeClientStream pipeIn;
 		internal static NamedPipeClientStream pipeOut;
@@ -94,7 +92,9 @@ namespace SubworldLibraryCommunityFork
 			Array.Fill(pendingMoves, -1);
 
 			rejoining = new bool[256];
-			rejoinNeedsResync = new bool[256];
+			rejoinLastState = new int[256];
+			rejoinStallTicks = new int[256];
+			rejoinPrompts = new int[256];
 
 			deniedSockets = new HashSet<ISocket>();
 

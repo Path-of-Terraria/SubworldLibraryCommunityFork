@@ -179,10 +179,6 @@ namespace SubworldLibraryCommunityFork
 				Main.menuMode = 10;
 				Main.gameMenu = true;
 
-				ModPacket packet = GetPacket();
-				packet.Write(id);
-				packet.Send();
-
 				Task.Factory.StartNew(SubworldSystem.ExitWorldCallBack, id < ushort.MaxValue ? id : -1);
 			}
 		}

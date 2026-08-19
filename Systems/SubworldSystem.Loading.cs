@@ -245,10 +245,6 @@ namespace SubworldLibraryCommunityFork
 			}
 			else
 			{
-				if (index != null)
-				{
-					Netplay.Connection.State = 3;
-				}
 				cache?.OnExit();
 			}
 
@@ -326,13 +322,14 @@ namespace SubworldLibraryCommunityFork
 			if (netMode != 1)
 			{
 				LoadWorld();
+				return;
 			}
-			// the subserver prompts packets from the client first now, so this is no longer needed
-			/*else
-			{
-				NetMessage.SendData(1);
-				Main.autoPass = true;
-			}*/
+
+			Netplay.Connection.State = 3;
+
+			ModPacket packet = ModContent.GetInstance<SubworldLibrary>().GetPacket();
+			packet.Write(index is int destination && destination >= 0 ? (ushort)destination : ushort.MaxValue);
+			packet.Send();
 		}
 
 		private static void LoadWorld()
@@ -533,7 +530,10 @@ namespace SubworldLibraryCommunityFork
 
 					return;
 				}
-				TryLoadWorldFile(path, cloud, tries++);
+				// tries++ passed the unincremented value, so a load that keeps failing recursed forever:
+				// neither the tries == 1 nor the tries == 3 branch was ever reached, the stack grew without
+				// bound, and every frame logged a full trace.
+				TryLoadWorldFile(path, cloud, tries + 1);
 			}
 		}
 
