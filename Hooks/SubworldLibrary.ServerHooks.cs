@@ -34,8 +34,7 @@ namespace SubworldLibraryCommunityFork
 					return;
 				}
 				c.Emit(OpCodes.Call, typeof(SubworldSystem).GetMethod("CheckBytes", BindingFlags.NonPublic | BindingFlags.Static));
-				// no-ops on subservers; see UpdateRejoiningPlayers
-				c.Emit(OpCodes.Call, typeof(SubworldSystem).GetMethod("UpdateRejoiningPlayers", BindingFlags.NonPublic | BindingFlags.Static));
+				c.Emit(OpCodes.Call, typeof(SubworldSystem).GetMethod("UpdateJoiningPlayers", BindingFlags.NonPublic | BindingFlags.Static));
 			};
 
 			// these are effectively not called on subservers, no need to patch them
